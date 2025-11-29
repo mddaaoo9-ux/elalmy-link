@@ -1,238 +1,157 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>العالــمي - الرئيسية</title>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+
+<!-- Uploadcare -->
+<script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
+
 <style>
-body {
-  background: #000;
-  font-family: Arial;
-  color: #0f0;
-  direction: rtl;
-  margin:0;
-  padding:0;
-}
-header {
-  background: #000;
-  padding: 25px;
-  text-align:center;
-  border-bottom:2px solid #0f0;
-  box-shadow:0 0 20px #0f0;
-}
-header h1 {
-  margin:0;
-  font-size:38px;
-  text-shadow:0 0 12px #0f0;
-}
-.container {
-  width:85%;
-  max-width:900px;
-  margin:40px auto;
-  background:#070707;
-  padding:25px;
-  border:2px solid #0f0;
-  border-radius:15px;
-  box-shadow:0 0 25px #0f0;
-}
-.article-box {
-  background:#111;
-  border:2px solid #0f0;
-  padding:20px;
-  border-radius:10px;
-  min-height:200px;
-  font-size:20px;
-  line-height:1.8;
-}
-.comments {
-  margin-top:30px;
-  background:#111;
-  padding:15px;
-  border-radius:10px;
-  border:1px solid #0f0;
-}
-.comment {
-  padding:10px;
-  margin-bottom:10px;
-  border-bottom:1px dashed #0f0;
-}
-.login-box {
-  width:300px;
-  margin:60px auto;
-  background:#0a0a0a;
-  padding:20px;
-  border-radius:12px;
-  border:2px solid #0f0;
-  box-shadow:0 0 20px #0f0;
-  text-align:center;
-}
-input, textarea {
-  width:90%;
-  padding:10px;
-  margin-top:10px;
-  background:#000;
-  border:1px solid #0f0;
-  color:#0f0;
-  border-radius:6px;
-}
-button {
-  margin-top:15px;
-  padding:10px 20px;
-  background:#000;
-  border:1px solid #0f0;
-  color:#0f0;
-  cursor:pointer;
-  border-radius:6px;
-}
-#errorMsg {
-  color:red;
-  margin-top:10px;
-  display:none;
-}
-#fileLink a { color:#0f0; }
+body { background:#000; color:#0f0; font-family:Arial; margin:0; padding:0; }
+header { background:#000; padding:25px; text-align:center; border-bottom:2px solid #0f0; box-shadow:0 0 20px #0f0; }
+header h1 { margin:0; font-size:38px; text-shadow:0 0 12px #0f0; }
+.container { width:85%; max-width:900px; margin:40px auto; background:#070707; padding:25px; border:2px solid #0f0; border-radius:15px; box-shadow:0 0 25px #0f0; }
+.article-box { background:#111; border:2px solid #0f0; padding:20px; border-radius:10px; min-height:200px; font-size:20px; line-height:1.8; }
+.box { background:#111; padding:15px; margin:10px 0; border:1px solid #0f0; border-radius:10px; }
+.commentUser { color:#0f0; font-weight:bold; font-size:17px; }
+.like, .deleteBtn { cursor:pointer; color:#0f0; display:inline-block; margin-top:10px; margin-right:20px; font-size:16px; }
+textarea { width:100%; height:80px; background:#000; color:#0f0; border:1px solid #0f0; border-radius:8px; padding:10px; }
+input { width:95%; padding:10px; background:#000; color:#0f0; border:1px solid #0f0; border-radius:8px; }
+button { background:#000; color:#0f0; border:1px solid #0f0; padding:10px 18px; margin-top:10px; cursor:pointer; border-radius:8px; }
 </style>
 </head>
 <body>
 
-<!-- تسجيل الدخول -->
-<div id="login" class="login-box">
-  <h2>تسجيل الدخول / إنشاء حساب</h2>
-  <input type="email" id="email" placeholder="البريد الإلكتروني">
-  <input type="password" id="password" placeholder="كلمة المرور">
-  <button onclick="emailLogin()">دخول عبر البريد</button>
-  <button onclick="signUp()">إنشاء حساب جديد</button>
-  <br><br>
-  <button onclick="googleLogin()">تسجيل دخول بواسطة Google</button>
-  <p id="errorMsg"></p>
-</div>
-
-<!-- المحتوى -->
-<div id="content" style="display:none;">
 <header>
   <h1>موقع العالــمي</h1>
 </header>
 
 <div class="container">
   <h2>📄 المقال الرئيسي</h2>
-  <div class="article-box" id="article">
-    موقع العاللمي لرفع الملفات يصنع لينك مباشر للصور أو الفيديوهات أو الملفات
-    مرحبًا بك ❤️
+  <div class="article-box">
+    موقع العاللمي لرفع الملفات يصنع لينك مباشر ل صوره او فديو او ملف او APK كل اللي انت محتاجه.
+    مرحبًا بك… منتظر تعليقك!
   </div>
 
-  <h2 style="margin-top:35px;">💬 التعليقات</h2>
-  <div class="comments" id="comments"></div>
+  <!-- تسجيل الدخول -->
+  <h2 style="margin-top:35px;">🔥 تسجيل الدخول</h2>
+  <div id="loginBox" class="box">
+      <input id="userName" placeholder="اكتب اسمك" />
+      <button onclick="loginUser()">تسجيل دخول</button>
+  </div>
 
-  <textarea id="newComment" placeholder="اكتب تعليقك هنا..."></textarea>
-  <button onclick="addComment()">إضافة تعليق</button>
+  <!-- كتابة التعليق -->
+  <div id="commentBox" class="box" style="display:none;">
+      <textarea id="commentText" placeholder="اكتب تعليقك..."></textarea>
+      <button onclick="sendComment()">إرسال تعليق</button>
+  </div>
+
+  <!-- التعليقات -->
+  <h2 style="margin-top:35px;">💬 التعليقات</h2>
+  <div id="commentsContainer"></div>
 
   <h2 style="margin-top:35px;">📁 رفع الملفات</h2>
-
-  <input type="hidden" role="uploadcare-uploader"
-    data-public-key="994dc8b431d0cb416e3c"
-    data-tabs="file camera url" />
-
+  <input type="hidden" role="uploadcare-uploader" data-public-key="994dc8b431d0cb416e3c" />
   <div id="fileLink" style="margin-top:15px;"></div>
 </div>
-</div>
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-
-<!-- Uploadcare -->
-<script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
 
 <script>
-//============ Firebase config =============
+// Firebase Config
 const firebaseConfig = {
-  apiKey: "AIzaSyD8VShkW_oEKB1n1cAaPoyT9Qy3P8dREp8",
-  authDomain: "elalmy-49226.firebaseapp.com",
-  projectId: "elalmy-49226",
-  storageBucket: "elalmy-49226.firebasestorage.app",
-  messagingSenderId: "350934830042",
-  appId: "1:350934830042:web:d2aeab648d4d42b08d4ee3"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "SENDER_ID",
+    appId: "APP_ID"
 };
-firebase.initializeApp(firebaseConfig);
 
-const auth = firebase.auth();
+const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const provider = new firebase.auth.GoogleAuthProvider();
 
-//============ Login functions ============
-function googleLogin(){
-  auth.signInWithPopup(provider).then(showContent).catch(showErr);
-}
-function emailLogin(){
-  let e = email.value, p = password.value;
-  auth.signInWithEmailAndPassword(e,p).then(showContent).catch(showErr);
-}
-function signUp(){
-  let e = email.value, p = password.value;
-  auth.createUserWithEmailAndPassword(e,p).then(showContent).catch(showErr);
-}
-function showErr(err){
-  errorMsg.style.display='block';
-  errorMsg.innerText = err.message;
+let currentUser = null;
+
+function loginUser(){
+    let name = document.getElementById("userName").value;
+    if(name.trim() === "") return alert("اكتب اسمك!");
+    currentUser = name;
+    localStorage.setItem("user", name);
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("commentBox").style.display = "block";
 }
 
-//============ بعد تسجيل الدخول ============
-function showContent(){
-  login.style.display = "none";
-  content.style.display = "block";
-  loadComments();
-}
+window.onload = () => {
+    let saved = localStorage.getItem("user");
+    if(saved){ currentUser = saved;
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("commentBox").style.display = "block";
+    }
+    loadComments();
+};
 
-//============ حفظ الجلسة ============
-auth.onAuthStateChanged(user=>{
-  if(user){
-    showContent();
-  }
-});
+function sendComment(){
+    let text = document.getElementById("commentText").value;
+    if(text.trim() === "") return;
 
-//============ إضافة تعليق =============
-function addComment(){
-  let text = newComment.value.trim();
-  if(text === "") return;
-
-  let user = auth.currentUser;
-  if(!user) return;
-
-  db.collection("comments").add({
-    name: user.email,
-    comment: text,
-    time: Date.now()
-  });
-
-  newComment.value = "";
-}
-
-//============ تحميل التعليقات =============
-function loadComments(){
-  db.collection("comments").orderBy("time","asc").onSnapshot(snap=>{
-    comments.innerHTML = "";
-    snap.forEach(doc=>{
-      let d = doc.data();
-      comments.innerHTML += `
-        <div class="comment">
-          <b>${d.name}</b><br>
-          ${d.comment}
-        </div>
-      `;
+    db.collection("comments").add({
+        user: currentUser,
+        text: text,
+        likes: 0,
+        time: Date.now()
     });
-  });
+
+    document.getElementById("commentText").value = "";
 }
 
-//============ Uploadcare =============
-UPLOADCARE_PUBLIC_KEY = "994dc8b431d0cb416e3c";
-UPLOADCARE_LOCALE = "ar";
+function loadComments(){
+    db.collection("comments").orderBy("time", "desc").onSnapshot(snapshot => {
+        let container = document.getElementById("commentsContainer");
+        container.innerHTML = "";
 
+        snapshot.forEach(doc => {
+            let data = doc.data();
+            let isOwner = (data.user === currentUser);
+
+            let div = document.createElement("div");
+            div.className = "box";
+            div.innerHTML = `
+                <div class="commentUser">${data.user}</div>
+                <div>${data.text}</div>
+                <span class="like" onclick="likeComment('${doc.id}', ${data.likes})">👍 لايك (${data.likes})</span>
+                ${isOwner ? `<span class="deleteBtn" onclick="deleteComment('${doc.id}')">🗑 حذف</span>` : ``}
+            `;
+
+            container.appendChild(div);
+        });
+    });
+}
+
+function likeComment(id, currentLikes){
+    db.collection("comments").doc(id).update({ likes: currentLikes + 1 });
+}
+
+function deleteComment(id){
+    if(confirm("هل تريد حذف هذا التعليق؟")){
+        db.collection("comments").doc(id).delete();
+    }
+}
+
+UPLOADCARE_LOCALE = "ar";
+UPLOADCARE_TABS = "file camera url";
 const widget = uploadcare.Widget('[role=uploadcare-uploader]');
-widget.onUploadComplete(info=>{
-  fileLink.innerHTML = `<b>رابط الملف:</b><br>
-    <a href="${info.cdnUrl}" target="_blank">${info.cdnUrl}</a>`;
+widget.onUploadComplete(function(fileInfo){
+    document.getElementById('fileLink').innerHTML = `
+        <b>رابط الملف:</b><br>
+        <a href="${fileInfo.cdnUrl}" target="_blank">${fileInfo.cdnUrl}</a>
+    `;
 });
 </script>
+
 </body>
 </html>
